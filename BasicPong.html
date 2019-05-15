@@ -1,4 +1,5 @@
 <html>
+    <!---Author: Tristan Berger Version: 1.02 Date: 5/15/19-->
     <title>Pong</title>
     <canvas id = "gameCanvas" width = "800" height = "600"></canvas>
     <script>
@@ -10,9 +11,9 @@
         var ballSpeedX = 5;
         var ballSpeedY = 5;
         
-        //p scores
-        var p1Score = 0;
-        var p2Score = 0;
+        //player scores
+        var player1Score = 0;
+        var player2Score = 0;
         const WINNING_SCORE = 3;
         var showWinScreen = false;
         
@@ -22,7 +23,6 @@
         const PADDLE_THICKNESS = 10;
         const PADDLE_HEIGHT = 100;
 
-
         function calcMousePos(evt){
             var rect = canvas.getBoundingClientRect();
             var root = document.documentElement;
@@ -31,13 +31,13 @@
             return{
                 x:mouseX,
                 y:mouseY
-        };
+            };
         }
-        
+        //Function to handle a mouse click event that resets game
         function handleMouseClick(evt){
             if(showWinScreen){
-                p1Score = 0;
-                p2Score = 0;
+                player1Score = 0;
+                player2Score = 0;
                 showWinScreen = false;
             }
         }
@@ -49,103 +49,99 @@
             var framesPerSecond = 30;
             setInterval(function() {moveEverything(); drawEverything();}, 1000/framesPerSecond);
             canvas.addEventListener('mousedown',handleMouseClick);
-            canvas.addEventListener('mousemove',function(evt){var mousePos = calcMousePos(evt);paddleY = mousePos.y - (PADDLE_HEIGHT/2);});
+            canvas.addEventListener('mousemove',function(evt){
+                var mousePos = calcMousePos(evt);paddleY = mousePos.y - (PADDLE_HEIGHT/2);});
         }
-
+        //Function that moves the com's paddle
         function comMovement(){
             var paddle2YCen = paddle2Y + (PADDLE_HEIGHT/2);
             if(paddle2YCen < ballY-35){
                 paddle2Y += 6;
-            } else if (paddle2YCen > ballY+35){
+            } else if(paddle2YCen > ballY+35){
                 paddle2Y -=  6;
             }
         }
-
-        function moveEverything() {
+        //Function that moves everything needed on screen
+        function moveEverything(){
             if(showWinScreen){
                 return;
             }
             comMovement();
-
             ballX += ballSpeedX;
             ballY += ballSpeedY;
-            
             if(ballX < 0){
-                if(ballY > paddleY && ballY < paddleY+PADDLE_HEIGHT) {
+                if(ballY > paddleY && ballY < paddleY+PADDLE_HEIGHT){
                     ballSpeedX = -ballSpeedX; 
                     var deltaY = ballY-(paddleY+PADDLE_HEIGHT/2);
                     ballSpeedY = deltaY*0.35;
-                    } else {
-                        p2Score++; 
+                } else{
+                        player2Score++; 
                         ballReset();
-                    }
+                  }
             }
-            if (ballX > canvas.width){
-                if(ballY > paddle2Y && ballY < paddle2Y+PADDLE_HEIGHT) {
+            if(ballX > canvas.width){
+                if(ballY > paddle2Y && ballY < paddle2Y+PADDLE_HEIGHT){
                     ballSpeedX = -ballSpeedX; 
                     var deltaY = ballY-(paddle2Y+PADDLE_HEIGHT/2);
                     ballSpeedY = deltaY*0.35;
-                    } else {
-                        p1Score++;
+                } else{
+                        player1Score++;
                         ballReset();
-                    }
+                  }
             }
             if(ballY < 0){
                 ballSpeedY = -ballSpeedY;
             }
-            if (ballY > canvas.height){
+            if(ballY > canvas.height){
                 ballSpeedY = -ballSpeedY;
             }
         }
+
         function drawNet(){
             for(var i=0; i<canvas.height; i+=40){
                 colorRect(canvas.width/2-1, i, 2, 20, 'white');
             }
         }
-        function drawEverything() {
-
+        //Function that draws game board, paddles, ball, and end screen.
+        function drawEverything(){
             colorRect( 0, 0, canvas.width, canvas.height, 'black')
-            
             if(showWinScreen){
                 canvasContext.fillStyle = 'white';
-                if(p1Score >= WINNING_SCORE){
-                    canvasContext.fillText( "Player 1 Won!", 350, 200);
-                } else if (p2Score >= WINNING_SCORE){
-                    canvasContext.fillText( "Player 2 Won!", 350, 200);
-            }
-                canvasContext.fillText( "click to continue", 350, 500);
+                if(player1Score >= WINNING_SCORE){
+                    canvasContext.fillText("Player 1 Won!", 350, 200);
+                } else if (player2Score >= WINNING_SCORE){
+                    canvasContext.fillText("Player 2 Won!", 350, 200);
+                }
+                canvasContext.fillText("click to continue", 350, 500);
                 return;
             }
-            
             drawNet();
             //player paddle
             colorRect( 0, paddleY, PADDLE_THICKNESS, PADDLE_HEIGHT, 'white');
-            //com paddle
+            //com's paddle
             colorRect( canvas.width - PADDLE_THICKNESS, paddle2Y, PADDLE_THICKNESS, PADDLE_HEIGHT, 'white');
             //ball
             colorCirc(ballX,ballY,10,'white');
-
             //score
             canvasContext.fillStyle = 'white';
-            canvasContext.fillText( p1Score, 100, 100);
-            canvasContext.fillText( p2Score, canvas.width-100, 100);
-
+            canvasContext.fillText( player1Score, 100, 100);
+            canvasContext.fillText( player2Score, canvas.width-100, 100);
         }
-
+        //Function to create a Rectangle
         function colorRect(leftX,topY,width,height,drawColor){
             canvasContext.fillStyle = drawColor;
             canvasContext.fillRect( leftX, topY, width, height);
         }
-
+        //Function to create a Circle
         function colorCirc(centerX, centerY, radius, drawColor){
             canvasContext.fillStyle = drawColor;
             canvasContext.beginPath();
             canvasContext.arc( centerX, centerY, radius, 0, Math.PI*2, true);
             canvasContext.fill();
         }
-
+        //Function that tracks when to reset game
         function ballReset(){
-            if(p1Score >= WINNING_SCORE || p2Score >= WINNING_SCORE){
+            if(player1Score >= WINNING_SCORE || player2Score >= WINNING_SCORE){
                 showWinScreen = true;
             }
             ballSpeedX = -ballSpeedX;
